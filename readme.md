@@ -90,7 +90,7 @@ ran -p=8888
 Example 2: Set root to /tmp, list files of directories and set a custom 404 page:
 
 ```bash
-ran -p=/tmp -l=true -404=/404.html
+ran -r=/tmp -l=true -404=/404.html
 ```
 
 Example 3: Close gzip compression, set access username and password:
