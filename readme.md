@@ -13,7 +13,7 @@ Ran is a simple web server for serving static files.
 - Access logging
 - Custom 404 error file
 
-## What Ran for?
+## What is Ran for?
 
 - File sharing in LAN or home network
 - Web application testing
@@ -42,13 +42,13 @@ You can also call `./build.py` command under the Ran source directory to write v
 
 ## Download binary
 
-You can also download Ran binary without build it yourself.
+You can also download the Ran binary without building it yourself.
 
 [Download Ran binary from the release page](https://github.com/m3ng9i/ran/releases).
 
 ## Run Ran
 
-You can start a web server without any options by typing `ran` and press return in terminal window. This will use the following default configuration:
+You can start a web server without any options by typing `ran` and pressing return in terminal window. This will use the following default configuration:
 
 Configuration               | Default value
 ----------------------------|--------------------------------
@@ -93,7 +93,7 @@ Example 2: Set root to /tmp, list files of directories and set a custom 404 page
 ran -p=/tmp -l=true -404=/404.html
 ```
 
-Example 3: Close gzip compression, set access username and password:
+Example 3: Turn off gzip compression, set access username and password:
 
 ```bash
 ran -g=false -a=user:pass
