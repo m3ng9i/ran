@@ -27,6 +27,7 @@ Ran is a simple web server for serving static files.
 - [github.com/m3ng9i/go-utils/log](https://github.com/m3ng9i/go-utils)
 - [github.com/m3ng9i/go-utils/possible](https://github.com/m3ng9i/go-utils)
 - [golang.org/x/net/context](https://github.com/golang/net)
+- [github.com/dustin/go-humanize](https://github.com/dustin/go-humanize)
 
 ## Installation
 
