@@ -148,14 +148,21 @@ func (this *RanServer) listDir(w http.ResponseWriter, c *context) (size int64, e
             name += "/"
         }
         name = html.EscapeString(name)
-        url := url.URL{Path: name}
+        fileUrl:= url.URL{Path: name}
 
         // write parent dir
         if n == 0 && c.cleanPath != "/" {
             parent := c.parent()
 
+            // unescape parent before get it's modification time
+            var parentUnescape string
+            parentUnescape, err = url.QueryUnescape(parent)
+            if err != nil {
+                return
+            }
+
             var info os.FileInfo
-            info, err = os.Stat(filepath.Join(this.config.Root, parent))
+            info, err = os.Stat(filepath.Join(this.config.Root, parentUnescape))
             if err != nil {
                 return
             }
@@ -163,7 +170,7 @@ func (this *RanServer) listDir(w http.ResponseWriter, c *context) (size int64, e
             files = append(files, dirListFiles{Name:"[..]", Url:parent, ModTime:info.ModTime()})
         }
 
-        files = append(files, dirListFiles{Name:name, Url:url.String(), Size:i.Size(), ModTime:i.ModTime()})
+        files = append(files, dirListFiles{Name:name, Url:fileUrl.String(), Size:i.Size(), ModTime:i.ModTime()})
     }
 
     data := dirList{ Title: title, Files: files}
