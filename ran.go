@@ -24,6 +24,29 @@ func catchSignal() {
 }
 
 
+func startLog() {
+    msg := "System: Ran is running on "
+
+    if global.Config.TLS != nil {
+        switch global.Config.TLS.Policy {
+            case global.TLSRedirect:
+                msg += fmt.Sprintf("HTTPS port %d, all traffic from HTTP port %d will redirect to HTTPS port",
+                    global.Config.TLS.Port, global.Config.Port)
+
+            case global.TLSBoth:
+                msg += fmt.Sprintf("HTTP port %d and HTTPS port %d", global.Config.Port, global.Config.TLS.Port)
+
+            case global.TLSOnly:
+                msg += fmt.Sprintf("HTTPS port %d", global.Config.TLS.Port)
+        }
+    } else {
+        msg += fmt.Sprintf("HTTP port %d", global.Config.Port)
+    }
+
+    global.Logger.Info(msg)
+}
+
+
 func main() {
 
     global.LoadConfig()
@@ -46,16 +69,58 @@ func main() {
     var wg sync.WaitGroup
     defer wg.Wait()
 
-    global.Logger.Infof("System: Ran is running on port %d", global.Config.Port)
+    startLog()
 
-    server := server.NewRanServer(global.Config.Config, global.Logger)
+    ran := server.NewRanServer(global.Config.Config, global.Logger)
 
-    wg.Add(1)
-    go func() {
-        err := http.ListenAndServe(fmt.Sprintf(":%d", global.Config.Port), server.Serve())
-        if err != nil {
-            global.Logger.Fatal(err)
+    startHTTPServer := func() {
+        wg.Add(1)
+        go func() {
+            err := http.ListenAndServe(fmt.Sprintf(":%d", global.Config.Port), ran.Serve())
+            if err != nil {
+                global.Logger.Fatal(err)
+            }
+            wg.Done()
+        }()
+    }
+
+    startTLSServer := func() {
+        wg.Add(1)
+        go func() {
+            err := http.ListenAndServeTLS(fmt.Sprintf(":%d", global.Config.TLS.Port),
+                    global.Config.TLS.PublicKey,
+                    global.Config.TLS.PrivateKey,
+                    ran.Serve())
+            if err != nil {
+                global.Logger.Fatal(err)
+            }
+            wg.Done()
+        }()
+    }
+
+    redirectToHTTPS := func() {
+        wg.Add(1)
+        go func() {
+            err := http.ListenAndServe(fmt.Sprintf(":%d", global.Config.Port), ran.RedirectToHTTPS(global.Config.TLS.Port))
+            if err != nil {
+                global.Logger.Fatal(err)
+            }
+            wg.Done()
+        }()
+    }
+
+    if global.Config.TLS != nil {
+        // turn on TLS encryption
+
+        startTLSServer()
+
+        if global.Config.TLS.Policy == global.TLSRedirect {
+            redirectToHTTPS()
+        } else if global.Config.TLS.Policy == global.TLSBoth {
+            startHTTPServer()
         }
-        wg.Done()
-    }()
+    } else {
+        startHTTPServer()
+    }
+
 }

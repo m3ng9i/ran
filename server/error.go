@@ -58,3 +58,27 @@ func ErrorFile404(w http.ResponseWriter, abspath string) (int64, error) {
     n, _ := w.Write(b)
     return int64(n), nil
 }
+
+
+func errorFile401(config Config) (a *hhelper.AuthFile, err error) {
+    if config.Path401 != nil {
+        tp, _ := hhelper.FileContentType(path.Ext(*config.Path401))
+        if tp == "" {
+            tp = "text/html; charset=utf-8"
+        }
+
+        b, e := ioutil.ReadFile(*config.Path401)
+        if e != nil {
+            err = e
+            return
+        }
+
+        a = new(hhelper.AuthFile)
+        a.ContentType = tp
+        a.Body = b
+
+        return
+    }
+
+    return
+}

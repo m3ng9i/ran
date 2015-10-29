@@ -42,14 +42,15 @@ Below are format specifiers and there meanings:
 %n  Number of bytes transferred
 %t  Response time
 %c  Compression status (gzip / none)
+%S  Scheme (http or https)
 */
 type LogLayout string
 
 
-var LogLayoutNormal LogLayout = `Access #%i: [Status: %s] [Host: %h] [IP: %a] [Method: %m] [URL: %l] [Referer: %r] [UA: %u] [Size: %n] [Time: %t] [Compression: %c]`
+var LogLayoutNormal LogLayout = `Access #%i: [Status: %s] [Host: %h] [IP: %a] [Method: %m] [Scheme: %S] [URL: %l] [Referer: %r] [UA: %u] [Size: %n] [Time: %t] [Compression: %c]`
 
 
-var LogLayoutShort LogLayout = `Access #%i: [%s] [%h] [%a] [%m] [%l] [%r] [%u] [%n] [%t] [%c]`
+var LogLayoutShort LogLayout = `Access #%i: [%s] [%h] [%a] [%m] [%S] [%l] [%r] [%u] [%n] [%t] [%c]`
 
 
 var LogLayoutMin LogLayout = `Access #%i: [%s] [%a] [%m] [%l] [%n]`
@@ -63,7 +64,7 @@ func (this *LogLayout) IsLegal() bool {
     OUTER:
     for _, c := range *this {
         if in {
-            for _, ch := range []rune("%ishamlruntc") {
+            for _, ch := range []rune("%ishamlruntcS") {
                 if c == ch {
                     in = false
                     continue OUTER
@@ -142,6 +143,16 @@ func (this *RanServer) accessLog(sniffer *hhelper.ResponseSniffer, r *http.Reque
                         buf.WriteString("gzip")
                     } else {
                         buf.WriteString("none")
+                    }
+
+                // scheme
+                case 'S':
+                    // Because r.URL.Scheme from the request is always empty,
+                    // so it's need to use r.TLS to check the scheme.
+                    if r.TLS != nil {
+                        buf.WriteString("https")
+                    } else {
+                        buf.WriteString("http")
                     }
 
                 default:

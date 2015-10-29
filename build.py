@@ -125,11 +125,13 @@ Examples:
 
         ./build.py windows/386
 
-    3. Build binaries for windows/386, linux/386:
+    3. Build binaries for windows/386 and linux/386:
 
         ./build.py windows/386 linux/386
 
-"""
+    4. Build binaries for linux/386 and linux/amd64:
+
+        ./build.py linux/386 linux/amd64"""
 
 
 errmsg = "Arguments are not valid GOOS/GOARCH pairs, use -h for help"

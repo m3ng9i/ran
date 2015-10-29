@@ -144,6 +144,9 @@ func randTime(n ...int64) int {
 }
 
 
+// make the request handler chain:
+// log -> digest auth -> gzip -> original handler
+// TODO: add ip filter: log -> [ip filter] -> digest auth -> gzip -> original handler
 func (this *RanServer) Serve() http.HandlerFunc {
 
     // original ran server handler
@@ -177,7 +180,19 @@ func (this *RanServer) Serve() http.HandlerFunc {
             time.Sleep(time.Duration(randTime()) * time.Millisecond)
         }
 
-        handler = da.DigestAuthHandler(handler, nil, failFunc)
+        var authFile *hhelper.AuthFile
+
+        // load custom 401 file
+        if this.config.Path401 != nil {
+            var err error
+            authFile, err = errorFile401(this.config)
+            if err != nil {
+                this.logger.Errorf("Load 401 file error: %s", err)
+            }
+        }
+
+        // if authFile is nil, display the default 401 error message
+        handler = da.DigestAuthHandler(handler, authFile, failFunc)
     }
 
     // log handler
@@ -188,3 +203,13 @@ func (this *RanServer) Serve() http.HandlerFunc {
     }
 }
 
+
+// redirect to https page
+func (this *RanServer) RedirectToHTTPS(port uint) http.HandlerFunc {
+    handler := this.logHandler(hhelper.RedirectToHTTPS(port))
+    return func(w http.ResponseWriter, r *http.Request) {
+        requestId := string(getRequestId(r.URL.String()))
+        w.Header().Set("X-Request-Id", requestId)
+        handler(w, r)
+    }
+}

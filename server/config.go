@@ -30,6 +30,9 @@ type Config struct {
     Path404     *string         // Abspath of custom 404 file, under directory of Root.
                                 // When a 404 not found error occurs, the file's content will be send to client.
                                 // nil means do not use 404 file.
+    Path401     *string         // Abspath of custom 401 file, under directory of Root.
+                                // When a 401 unauthorized error occurs, the file's content will be send to client.
+                                // nil means do not use 401 file.
     IndexName   Index           // File name of index, priority depends on the order of values.
                                 // Default is []string{"index.html", "index.htm"}.
     ListDir     bool            // If no index file provide, show file list of the directory.

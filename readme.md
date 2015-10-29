@@ -11,7 +11,8 @@ Ran is a simple web server for serving static files.
 - Automatic gzip compression
 - Digest authentication
 - Access logging
-- Custom 404 error file
+- Custom 401 and 404 error file
+- TLS encryption
 
 ## What is Ran for?
 
@@ -58,14 +59,15 @@ Index file                  | index.html, index.htm
 List files of directories   | false
 Gzip                        | true
 Digest auth                 | false
+TLS encryption              | off
 
 Open http://127.0.0.1:8080 in browser to see your website.
 
-You can use the options below to override the default configuration.
+You can use the command line options to override the default configuration.
 
-```
 Options:
 
+```
     -r, -root=<path>        Root path of the site. Default is current working directory.
     -p, -port=<port>        HTTP port. Default is 8080.
         -404=<path>         Path of a custom 404 file, relative to Root. Example: /404.html.
@@ -76,42 +78,104 @@ Options:
                             if listdir is true, show file list of the directory,
                             if listdir is false, return 404 not found error.
                             Default is false.
-    -g, -gzip=<bool>        If turn on gzip compression. Default is true.
+    -g, -gzip=<bool>        Turn on or off gzip compression. Default value is true (means turn on).
+
     -a, -auth=<user:pass>   Turn on digest auth and set username and password (separate by colon).
                             After turn on digest auth, all the page require authentication.
-```
+        -401=<path>         Path of a custom 401 file, relative to Root. Example: /401.html.
+                            If authentication fails and 401 file is set,
+                            the file content will be sent to the client.
 
-Example 1: Start a server in the current directory and set port to 8888:
-
-```bash
-ran -p=8888
-```
-
-Example 2: Set root to /tmp, list files of directories and set a custom 404 page:
-
-```bash
-ran -r=/tmp -l=true -404=/404.html
-```
-
-Example 3: Turn off gzip compression, set access username and password:
-
-```bash
-ran -g=false -a=user:pass
-```
-
-Example 4: Set custom index file:
-
-```bash
-ran -i default.html:index.html
+        -tls-port=<port>    HTTPS port. Default is 443.
+        -tls-policy=<pol>   This option indicates how to handle HTTP and HTTPS traffic.
+                            There are three option values: redirect, both and only.
+                            redirect: redirect HTTP to HTTPS
+                            both:     both HTTP and HTTPS are enabled
+                            only:     only HTTPS is enabled, HTTP is disabled
+                            The default value is: only.
+        -cert=<path>        Load a file as a certificate.
+                            If use with -make-cert, will generate a certificate to the path.
+        -key=<path>         Load a file as a private key.
+                            If use with -make-cert, will generate a private key to the path.
 ```
 
 Other options:
 
 ```
+        -make-cert          Generate a self-signed certificate and a private key used in TLS encryption.
+                            You should use -cert and -key to set the output paths.
         -showconf           Show config info in the log.
         -debug              Turn on debug mode.
     -v, -version            Show version information.
     -h, -help               Show help message.
+```
+
+If you want to shutdown Ran, type `ctrl+c` in the terminal, or kill it in the task manager.
+
+### Examples
+
+Example 1: Start a server in the current directory and set port to 8888
+
+```bash
+ran -p=8888
+```
+
+Example 2: Set root to /tmp, list files of directories and set a custom 404 page
+
+```bash
+ran -r=/tmp -l=true -404=/404.html
+```
+
+`-l=true` can be shorted to `-l` for convenience.
+
+Example 3: Turn off gzip compression, set access username and password and set a custom 401 page
+
+```bash
+ran -g=false -a=user:pass -401=/401.html
+```
+
+Example 4: Set custom index file
+
+```bash
+ran -i default.html:index.html
+```
+
+Example 5: Turn on TLS encryption
+
+If you want to turn on TLS encryption (https), you should use `-cert` to load a certificate and `-key` to load a private key.
+
+The default TLS port is 443, you can use `-tls-port` to set it to another port.
+
+The following command load a certificate and a private key, and set TLS port to 9999. It can be browsed at https://127.0.0.1:9999.
+
+```bash
+ran -cert=/path/to/cert.pem -key=/path/to/key.pem -tls-port=9999
+```
+
+Example 6: Control HTTP and HTTPS traffic
+
+When you turn on TLS, you can choose to disable HTTP, redirect HTTP to HTTPS or let them work together.
+
+You can use `-tls-policy` to control HTTP and HTTPS traffic:
+
+- If set to "redirect", all HTTP traffic will be redirect to HTTPS.
+- If set to "both", both HTTP and HTTPS are enabled.
+- If set to "only", only HTTPS is enabled, HTTP is disabled.
+
+If not provide `-tls-policy`, the default value "only" will be used.
+
+An example:
+
+```bash
+ran -cert=cert.pem -key=key.pem -tls-policy=redirect
+```
+
+Example 7: Create a self-signed certificate and a private key
+
+For testing purposes or internal usage, you can use `-make-cert` to create a self-signed certificate and a private key.
+
+```bash
+ran -make-cert -cert=/path/to/cert.pem -key=/path/to/key.pem
 ```
 
 ## Tips and tricks
@@ -151,7 +215,6 @@ Read the source code of [CanBeCompressed()](https://github.com/m3ng9i/go-utils/b
 The following functionalities will be added in the future:
 
 - Load config from file
-- TLS encryption
 - IP filter
 - Custom log format
 - etc
