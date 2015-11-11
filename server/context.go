@@ -80,6 +80,10 @@ func newContext(config Config, r *http.Request) (c *context, err error) {
                 if err != nil {
                     return
                 }
+                // add trailing slash if the request path is a directory and the directory contains a index file
+                if !strings.HasSuffix(c.cleanPath, "/") {
+                    c.cleanPath += "/"
+                }
                 break
             }
         }
