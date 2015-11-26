@@ -145,8 +145,8 @@ func randTime(n ...int64) int {
 
 
 // make the request handler chain:
-// log -> digest auth -> gzip -> original handler
-// TODO: add ip filter: log -> [ip filter] -> digest auth -> gzip -> original handler
+// log -> authentication -> gzip -> original handler
+// TODO: add ip filter: log -> [ip filter] -> authentication -> gzip -> original handler
 func (this *RanServer) Serve() http.HandlerFunc {
 
     // original ran server handler
@@ -157,23 +157,9 @@ func (this *RanServer) Serve() http.HandlerFunc {
         handler = hhelper.GzipHandler(handler, true, true)
     }
 
-    // digest handler
+    // authentication handler
     if this.config.Auth != nil {
-
-        da := hhelper.DigestAuth {
-            Realm: "Identity authentication",
-
-            Secret: func(user, realm string) string {
-                if user == this.config.Auth.Username {
-                    md5sum := md5.Sum([]byte(fmt.Sprintf("%s:%s:%s", user, realm, this.config.Auth.Password)))
-                    return fmt.Sprintf("%x", md5sum)
-                }
-                return ""
-            },
-
-            ClientCacheSize: 2000,
-            ClientCacheTolerance: 200,
-        }
+        realm := "Identity authentication"
 
         failFunc := func() {
             // sleep 300~2499 milliseconds to prevent brute force attack
@@ -191,8 +177,32 @@ func (this *RanServer) Serve() http.HandlerFunc {
             }
         }
 
-        // if authFile is nil, display the default 401 error message
-        handler = da.DigestAuthHandler(handler, authFile, failFunc)
+        if this.config.Auth.Method == DigestMethod {
+            da := hhelper.DigestAuth {
+                Realm: realm,
+
+                Secret: func(user, realm string) string {
+                    if user == this.config.Auth.Username {
+                        md5sum := md5.Sum([]byte(fmt.Sprintf("%s:%s:%s", user, realm, this.config.Auth.Password)))
+                        return fmt.Sprintf("%x", md5sum)
+                    }
+                    return ""
+                },
+
+                ClientCacheSize: 2000,
+                ClientCacheTolerance: 200,
+            }
+
+            // if authFile is nil, display the default 401 error message
+            handler = da.DigestAuthHandler(handler, authFile, failFunc)
+        } else {
+            ba := hhelper.BasicAuth {
+                Realm: realm,
+                Secret: hhelper.BasicAuthSecret(this.config.Auth.Username, this.config.Auth.Password),
+            }
+
+            handler = ba.BasicAuthHandler(handler, authFile, failFunc)
+        }
     }
 
     // log handler

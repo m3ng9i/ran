@@ -43,6 +43,10 @@ func startLog() {
         msg += fmt.Sprintf("HTTP port %d", global.Config.Port)
     }
 
+    if global.Config.Auth != nil {
+        msg += fmt.Sprintf(" with %s auth", string(global.Config.Auth.Method))
+    }
+
     global.Logger.Info(msg)
 }
 

@@ -17,11 +17,21 @@ func (this *Index) Set(value string) error {
 }
 
 
+type AuthMethod string
+const BasicMethod  AuthMethod = "basic"
+const DigestMethod AuthMethod = "digest"
+
+
 type Auth struct {
     Username string
     Password string
-    Paths    []string   // paths which use password to protect, relative to "/"
-                        // if Paths is empty, all paths are protected.
+
+    // paths which use password to protect, relative to "/".
+    // if Paths is empty, all paths are protected.
+    // not used currently
+    Paths    []string
+
+    Method AuthMethod
 }
 
 
@@ -38,7 +48,7 @@ type Config struct {
     ListDir     bool            // If no index file provide, show file list of the directory.
                                 // Default is false.
     Gzip        bool            // If turn on gzip compression, default is true.
-    Auth        *Auth           // If not nil, turn on digest auth.
+    Auth        *Auth           // If not nil, turn on authentication.
 }
 
 
