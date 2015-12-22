@@ -9,6 +9,7 @@ import "net/url"
 import "html"
 import "path"
 import "path/filepath"
+import "strings"
 
 
 type dirListFiles struct {
@@ -112,7 +113,7 @@ func init() {
 
 // List content of a directory.
 // If error occurs, this function will return an error and won't write anything to ResponseWriter.
-func (this *RanServer) listDir(w http.ResponseWriter, c *context) (size int64, err error) {
+func (this *RanServer) listDir(w http.ResponseWriter, serveAll bool, c *context) (size int64, err error) {
 
     if !c.exist {
         size = Error(w, 404)
@@ -142,12 +143,17 @@ func (this *RanServer) listDir(w http.ResponseWriter, c *context) (size int64, e
     var files []dirListFiles
 
     for n, i := range info {
-        // TODO: skipped files according to ignore list in config
         name := i.Name()
         if i.IsDir() {
             name += "/"
         }
         name = html.EscapeString(name)
+
+        // skip hidden path
+        if !serveAll && strings.HasPrefix(name, ".") {
+            continue
+        }
+
         fileUrl:= url.URL{Path: name}
 
         // write parent dir

@@ -108,7 +108,7 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
     // so there is no need to check value of Config.ListDir.
     if context.isDir {
         // display file list of a directory
-        _, err = this.listDir(w, context)
+        _, err = this.listDir(w, this.config.ServeAll, context)
         if err != nil {
             Error(w, 500)
             this.logger.Errorf("#%s: %s", requestId, err)

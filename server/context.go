@@ -58,6 +58,13 @@ func newContext(config Config, r *http.Request) (c *context, err error) {
         c.isDir = info.IsDir()
     }
 
+    // if -serve-all is false and the path is a hidden path, then return 404 error.
+    // a hidden path is a path start with dot.
+    if !config.ServeAll && strings.Contains(c.cleanPath, "/.") {
+        c.exist = false
+        c.isDir = false
+    }
+
     if c.isDir {
         for _, name := range config.IndexName {
             index := filepath.Join(c.absFilePath, name)

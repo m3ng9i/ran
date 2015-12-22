@@ -198,6 +198,7 @@ Port: %d
 Path404: %s
 IndexName: %s
 ListDir: %t
+ServeAll: %t
 Gzip: %t
 Debug: %t
 Auth: %s
@@ -220,6 +221,7 @@ Path401: %s
                     path404,
                     strings.Join(this.IndexName, ", "),
                     this.ListDir,
+                    this.ServeAll,
                     this.Gzip,
                     this.Debug,
                     auth,
@@ -245,6 +247,7 @@ func defaultConfig() (c *Setting, err error) {
     c.Path404       = nil
     c.IndexName     = []string{"index.html", "index.htm"}
     c.ListDir       = false
+    c.ServeAll      = false
     c.Gzip          = true
     c.Debug         = false
 
@@ -269,6 +272,7 @@ Options:
                              if listdir is true, show file list of the directory,
                              if listdir is false, return 404 not found error.
                              Default is false.
+    -sa, -serve-all=<bool>   Serve all paths even if the path is start with dot.
     -g,  -gzip=<bool>        Turn on or off gzip compression. Default value is true (means turn on).
 
     -am, -auth-method=<auth> Set authentication method, valid values are basic and digest. Default is basic.
@@ -345,6 +349,8 @@ func LoadConfig() {
     flag.Var(      &indexName,       "index",                "File name of index, separate by colon")
     flag.BoolVar(  &Config.ListDir,  "l",           false,   "Show file list of a directory")
     flag.BoolVar(  &Config.ListDir,  "listdir",     false,   "Show file list of a directory")
+    flag.BoolVar(  &Config.ServeAll, "sa",          false,   "Serve all paths even if the path is start with dot")
+    flag.BoolVar(  &Config.ServeAll, "serve-all",   false,   "Serve all paths even if the path is start with dot")
     flag.BoolVar(  &Config.Gzip,     "g",           true,    "Turn on/off gzip compression")
     flag.BoolVar(  &Config.Gzip,     "gzip",        true,    "Turn on/off gzip compression")
     flag.BoolVar(  &Config.ShowConf, "showconf",    false,   "If show config info in the log")
