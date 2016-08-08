@@ -68,46 +68,48 @@ You can use the command line options to override the default configuration.
 Options:
 
 ```
-    -r, -root=<path>        Root path of the site. Default is current working directory.
-    -p, -port=<port>        HTTP port. Default is 8080.
-        -404=<path>         Path of a custom 404 file, relative to Root. Example: /404.html.
-    -i, -index=<path>       File name of index, priority depends on the order of values.
-                            Separate by colon. Example: -i "index.html:index.htm"
-                            If not provide, default is index.html and index.htm.
-    -l, -listdir=<bool>     When request a directory and no index file found,
-                            if listdir is true, show file list of the directory,
-                            if listdir is false, return 404 not found error.
-                            Default is false.
-    -g, -gzip=<bool>        Turn on or off gzip compression. Default value is true (means turn on).
+    -r,  -root=<path>        Root path of the site. Default is current working directory.
+    -p,  -port=<port>        HTTP port. Default is 8080.
+         -404=<path>         Path of a custom 404 file, relative to Root. Example: /404.html.
+    -i,  -index=<path>       File name of index, priority depends on the order of values.
+                             Separate by colon. Example: -i "index.html:index.htm"
+                             If not provide, default is index.html and index.htm.
+    -l,  -listdir=<bool>     When request a directory and no index file found,
+                             if listdir is true, show file list of the directory,
+                             if listdir is false, return 404 not found error.
+                             Default is false.
+    -sa, -serve-all=<bool>   Serve all paths even if the path is start with dot.
+    -g,  -gzip=<bool>        Turn on or off gzip compression. Default value is true (means turn on).
 
-    -a, -auth=<user:pass>   Turn on digest auth and set username and password (separate by colon).
-                            After turn on digest auth, all the page require authentication.
-        -401=<path>         Path of a custom 401 file, relative to Root. Example: /401.html.
-                            If authentication fails and 401 file is set,
-                            the file content will be sent to the client.
+    -am, -auth-method=<auth> Set authentication method, valid values are basic and digest. Default is basic.
+    -a,  -auth=<user:pass>   Turn on authentication and set username and password (separate by colon).
+                             After turn on authentication, all the page require authentication.
+         -401=<path>         Path of a custom 401 file, relative to Root. Example: /401.html.
+                             If authentication fails and 401 file is set,
+                             the file content will be sent to the client.
 
-        -tls-port=<port>    HTTPS port. Default is 443.
-        -tls-policy=<pol>   This option indicates how to handle HTTP and HTTPS traffic.
-                            There are three option values: redirect, both and only.
-                            redirect: redirect HTTP to HTTPS
-                            both:     both HTTP and HTTPS are enabled
-                            only:     only HTTPS is enabled, HTTP is disabled
-                            The default value is: only.
-        -cert=<path>        Load a file as a certificate.
-                            If use with -make-cert, will generate a certificate to the path.
-        -key=<path>         Load a file as a private key.
-                            If use with -make-cert, will generate a private key to the path.
+         -tls-port=<port>    HTTPS port. Default is 443.
+         -tls-policy=<pol>   This option indicates how to handle HTTP and HTTPS traffic.
+                             There are three option values: redirect, both and only.
+                             redirect: redirect HTTP to HTTPS
+                             both:     both HTTP and HTTPS are enabled
+                             only:     only HTTPS is enabled, HTTP is disabled
+                             The default value is: only.
+         -cert=<path>        Load a file as a certificate.
+                             If use with -make-cert, will generate a certificate to the path.
+         -key=<path>         Load a file as a private key.
+                             If use with -make-cert, will generate a private key to the path.
 ```
 
 Other options:
 
 ```
-        -make-cert          Generate a self-signed certificate and a private key used in TLS encryption.
-                            You should use -cert and -key to set the output paths.
-        -showconf           Show config info in the log.
-        -debug              Turn on debug mode.
-    -v, -version            Show version information.
-    -h, -help               Show help message.
+         -make-cert          Generate a self-signed certificate and a private key used in TLS encryption.
+                             You should use -cert and -key to set the output paths.
+         -showconf           Show config info in the log.
+         -debug              Turn on debug mode.
+    -v,  -version            Show version information.
+    -h,  -help               Show help message.
 ```
 
 If you want to shutdown Ran, type `ctrl+c` in the terminal, or kill it in the task manager.
@@ -209,6 +211,19 @@ http://127.0.0.1:8080/large-file.txt?gzip=false
 ```
 
 Read the source code of [CanBeCompressed()](https://github.com/m3ng9i/go-utils/blob/master/http/can_be_compressed.go) to learn more about automatic gzip compression.
+
+## Changelog
+
+- **v0.1.3**:
+
+    - Add trailing slash if the request path is a directory and the directory contains a index file.
+    - Add basic auth; add -am, -auth-method option.
+    - Add -sa, -serve-all option to set if skip paths that start with dot.
+    - Print the listening URLs after the server starts.
+
+- **v0.1.2**: Add TLS encryption; add custom 401 file.
+- **v0.1.1**: Fix bugs and typos.
+- **v0.1**: Initial release.
 
 ## ToDo
 
