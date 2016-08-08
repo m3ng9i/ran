@@ -2,6 +2,7 @@ package main
 
 import "syscall"
 import "os/signal"
+import "net"
 import "net/http"
 import "os"
 import "fmt"
@@ -21,6 +22,66 @@ func catchSignal() {
             os.Exit(0)
         }
     }()
+}
+
+
+
+// Get all available IPv4 addresses in system's network interface.
+func getIPAutomaticly() (ip []string, e error) {
+    iface, err := net.Interfaces()
+    if err != nil {
+        e = err
+        return
+    }
+
+    for _, i := range iface {
+        addrs, err := i.Addrs()
+        if e != nil {
+            e = err
+            return
+        }
+        for _, a := range addrs {
+            add := net.ParseIP(strings.SplitN(a.String(), "/", 2)[0])
+            if add.To4() != nil {
+                ip = append(ip, add.String())
+            }
+        }
+    }
+
+    for _, i := range ip {
+        if i == "127.0.0.1" {
+            return
+        }
+    }
+
+    // add loopback
+    ip = append(ip, "127.0.0.1")
+
+    return
+}
+
+
+// Get all Listening address, like: http://127.0.0.1:8080
+func getListeningAddr() (addr []string, err error) {
+    ips, err := getIPAutomaticly()
+    if err != nil {
+        return
+    }
+
+    for _, i := range ips {
+        if global.Config.TLS != nil {
+            if global.Config.TLS.Policy == global.TLSOnly {
+                addr = append(addr, fmt.Sprintf("https://%s:%d", i, global.Config.TLS.Port))
+            } else {
+                addr = append(addr, fmt.Sprintf("http://%s:%d", i, global.Config.Port))
+                addr = append(addr, fmt.Sprintf("https://%s:%d", i, global.Config.TLS.Port))
+            }
+        } else {
+            addr = append(addr, fmt.Sprintf("http://%s:%d", i, global.Config.Port))
+        }
+    }
+
+    return
 }
 
 
@@ -48,6 +109,15 @@ func startLog() {
     }
 
     global.Logger.Info(msg)
+
+    addr, err := getListeningAddr()
+    if err != nil {
+        global.Logger.Error(err)
+    } else {
+        for _, i := range addr {
+            global.Logger.Infof("System: Listening on %s", i)
+        }
+    }
 }
 
 
