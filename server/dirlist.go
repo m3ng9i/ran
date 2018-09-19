@@ -3,6 +3,7 @@ package server
 import "text/template"
 import "fmt"
 import "os"
+import "sort"
 import "time"
 import "net/http"
 import "net/url"
@@ -135,6 +136,10 @@ func (this *RanServer) listDir(w http.ResponseWriter, serveAll bool, c *context)
     if err != nil {
         return
     }
+    
+    sort.Slice(info, func(i, j int) bool {
+        return info[i].Name() < info[j].Name()
+    })
 
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
