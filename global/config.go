@@ -276,10 +276,10 @@ Options:
                                 if listdir is true, show file list of the directory,
                                 if listdir is false, return 404 not found error.
                                 Default is false.
-    -sa, -serve-all=<bool>      Serve all paths even if the path is start with dot.
+    -sa, -serve-all=<bool>      Serve all paths even if the path is start with dot. Default is false.
     -g,  -gzip=<bool>           Turn on or off gzip compression. Default value is true (means turn on).
 
-    -nc, -no-cache=<bool>       If true, ran will add a no-cache header in the response. Default is false.
+    -nc, -no-cache=<bool>       If true, ran will add a no-cache header and remove Last-Modified header in the response. Default is false.
     -ao, -allow-origin=<bool>   If true, ran will add a "Access-Control-Allow-Origin: *" header in the response. Default is false.
 
     -am, -auth-method=<auth>    Set authentication method, valid values are basic and digest. Default is basic.
