@@ -12,7 +12,7 @@ import hhelper "github.com/m3ng9i/go-utils/http"
 
 
 // serveFile() serve any request with content pointed by abspath.
-func serveFile(w http.ResponseWriter, r *http.Request, abspath string) error {
+func serveFile(w http.ResponseWriter, r *http.Request, abspath string, setLastModified bool) error {
     f, err := os.Open(abspath)
     if err != nil {
         return err
@@ -36,8 +36,14 @@ func serveFile(w http.ResponseWriter, r *http.Request, abspath string) error {
         hhelper.WriteDownloadHeader(w, filename)
     }
 
+    // if lastModified is not zero Time, http.ServeContent() will write a Last-Modified header.
+    var lastModified time.Time
+    if setLastModified {
+        lastModified = info.ModTime()
+    }
+
     // http.ServeContent() always return a status code of 200.
-    http.ServeContent(w, r, filename, info.ModTime(), f)
+    http.ServeContent(w, r, filename, lastModified, f)
     return nil
 }
 
@@ -110,7 +116,7 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
     // display index page
     if context.indexPath != "" {
-        err := serveFile(w, r, context.absFilePath)
+        err := serveFile(w, r, context.absFilePath, !this.config.NoCache)
         if err != nil {
             Error(w, 500)
             this.logger.Errorf("#%s: %s", requestId, err)
@@ -132,7 +138,7 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
     }
 
     // serve the static file.
-    err = serveFile(w, r, context.absFilePath)
+    err = serveFile(w, r, context.absFilePath, !this.config.NoCache)
     if err != nil {
         Error(w, 500)
         this.logger.Errorf("#%s: %s", requestId, err)
