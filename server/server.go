@@ -73,6 +73,10 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
         setNoCacheHeader(w)
     }
 
+    if (this.config.AllowOrigin) {
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+    }
+
     this.logger.Debugf("#%s: r.URL: [%s]", requestId, r.URL.String())
 
     context, err := newContext(this.config, r)

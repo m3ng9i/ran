@@ -49,6 +49,7 @@ type Config struct {
                                 // Default is false.
     Gzip        bool            // If turn on gzip compression, default is true.
     NoCache     bool            // If true, ran will add a no-cache header in the response. Default is false.
+    AllowOrigin bool            // If true, ran will add a "Access-Control-Allow-Origin: *" header in the response. Default is false.
     Auth        *Auth           // If not nil, turn on authentication.
     ServeAll    bool            // If is false, path start with dot will not be served, that means a 404 error will be returned.
 }
