@@ -200,6 +200,7 @@ IndexName: %s
 ListDir: %t
 ServeAll: %t
 Gzip: %t
+NoCache: %t
 Debug: %t
 Auth: %s
 Path401: %s
@@ -223,6 +224,7 @@ Path401: %s
                     this.ListDir,
                     this.ServeAll,
                     this.Gzip,
+                    this.NoCache,
                     this.Debug,
                     auth,
                     path401,
@@ -274,6 +276,8 @@ Options:
                              Default is false.
     -sa, -serve-all=<bool>   Serve all paths even if the path is start with dot.
     -g,  -gzip=<bool>        Turn on or off gzip compression. Default value is true (means turn on).
+
+    -nc, -no-cache=<bool>    If true, ran will add a no-cache header in the response. Default is false.
 
     -am, -auth-method=<auth> Set authentication method, valid values are basic and digest. Default is basic.
     -a,  -auth=<user:pass>   Turn on authentication and set username and password (separate by colon).
@@ -353,6 +357,8 @@ func LoadConfig() {
     flag.BoolVar(  &Config.ServeAll, "serve-all",   false,   "Serve all paths even if the path is start with dot")
     flag.BoolVar(  &Config.Gzip,     "g",           true,    "Turn on/off gzip compression")
     flag.BoolVar(  &Config.Gzip,     "gzip",        true,    "Turn on/off gzip compression")
+    flag.BoolVar(  &Config.NoCache,  "nc",          false,   "If send no-cache header")
+    flag.BoolVar(  &Config.NoCache,  "no-cache",    false,   "If send no-cache header")
     flag.BoolVar(  &Config.ShowConf, "showconf",    false,   "If show config info in the log")
     flag.BoolVar(  &Config.Debug,    "debug",       false,   "Turn on debug mode")
     flag.BoolVar(  &version,         "v",           false,   "Show version information")

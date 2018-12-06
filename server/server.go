@@ -56,11 +56,22 @@ func NewRanServer(c Config, logger *log.Logger) *RanServer {
 }
 
 
+func setNoCacheHeader(w http.ResponseWriter) {
+    w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+    w.Header().Set("Pragma", "no-cache")
+    w.Header().Set("Expires", "0")
+}
+
+
 func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
     requestId := string(getRequestId(r.URL.String()))
 
     w.Header().Set("X-Request-Id", requestId)
+
+    if (this.config.NoCache) {
+        setNoCacheHeader(w)
+    }
 
     this.logger.Debugf("#%s: r.URL: [%s]", requestId, r.URL.String())
 
