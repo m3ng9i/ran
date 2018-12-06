@@ -12,6 +12,16 @@ import "github.com/m3ng9i/ran/global"
 import "github.com/m3ng9i/ran/server"
 
 
+// version information
+var _version_   = "unknown"
+var _branch_    = "unknown"
+var _commitId_  = "unknown"
+var _buildTime_ = "unknown"
+
+var versionInfo = fmt.Sprintf("Version: %s, Branch: %s, Build: %s, Build time: %s",
+        _version_, _branch_, _commitId_, _buildTime_)
+
+
 func catchSignal() {
     signal_channel := make(chan os.Signal, 1)
     signal.Notify(signal_channel, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -123,7 +133,7 @@ func startLog() {
 
 func main() {
 
-    global.LoadConfig()
+    global.LoadConfig(versionInfo)
 
     defer func() {
         global.Logger.Wait()

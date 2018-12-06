@@ -9,16 +9,6 @@ import phelper "github.com/m3ng9i/go-utils/path"
 import "github.com/m3ng9i/ran/server"
 
 
-// version information
-var _version_   = "unknown"
-var _branch_    = "unknown"
-var _commitId_  = "unknown"
-var _buildTime_ = "unknown"
-
-var versionInfo = fmt.Sprintf("Version: %s, Branch: %s, Build: %s, Build time: %s",
-        _version_, _branch_, _commitId_, _buildTime_)
-
-
 type TLSPolicy string
 const (
     TLSRedirect TLSPolicy = "redirect"
@@ -321,7 +311,7 @@ os.Exit(0)
 }
 
 
-func LoadConfig() {
+func LoadConfig(versionInfo string) {
 
     var err error
     Config, err = defaultConfig()
