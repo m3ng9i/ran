@@ -109,7 +109,12 @@ func (this *RanServer) accessLog(sniffer *hhelper.ResponseSniffer, r *http.Reque
 
                 // client ip address
                 case 'a':
-                    buf.WriteString(hhelper.GetIP(r))
+                    ip := hhelper.GetIP(r)
+                    realIp := r.Header.Get("X-Real-Ip")
+                    if realIp != "" {
+                        ip = ip + " (X-REAL-IP: " + realIp + ")"
+                    }
+                    buf.WriteString(ip)
 
                 // request method
                 case 'm':
