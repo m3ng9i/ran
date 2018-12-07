@@ -69,6 +69,16 @@ func setNoCacheHeader(w http.ResponseWriter) {
 }
 
 
+func setCORSHeader(w http.ResponseWriter, r *http.Request) {
+    origin := r.Header.Get("Origin")
+    if origin == "" {
+        origin = "*"
+    }
+    w.Header().Set("Access-Control-Allow-Origin", origin)
+    w.Header().Set("Access-Control-Allow-Credentials", "true")
+}
+
+
 func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
     requestId := string(getRequestId(r.URL.String()))
@@ -80,7 +90,7 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
     }
 
     if (this.config.AllowOrigin) {
-        w.Header().Set("Access-Control-Allow-Origin", "*")
+        setCORSHeader(w, r)
     }
 
     this.logger.Debugf("#%s: r.URL: [%s]", requestId, r.URL.String())
