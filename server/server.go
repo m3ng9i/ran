@@ -89,7 +89,7 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
         setNoCacheHeader(w)
     }
 
-    if (this.config.AllowOrigin) {
+    if (this.config.CORS) {
         setCORSHeader(w, r)
     }
 

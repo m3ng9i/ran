@@ -191,7 +191,7 @@ ListDir: %t
 ServeAll: %t
 Gzip: %t
 NoCache: %t
-AllowOrigin: %t
+CORS: %t
 Debug: %t
 Auth: %s
 Path401: %s
@@ -216,7 +216,7 @@ Path401: %s
                     this.ServeAll,
                     this.Gzip,
                     this.NoCache,
-                    this.AllowOrigin,
+                    this.CORS,
                     this.Debug,
                     auth,
                     path401,
@@ -269,8 +269,17 @@ Options:
     -sa, -serve-all=<bool>      Serve all paths even if the path is start with dot. Default is false.
     -g,  -gzip=<bool>           Turn on or off gzip compression. Default value is true (means turn on).
 
-    -nc, -no-cache=<bool>       If true, ran will add a no-cache header and remove Last-Modified header in the response. Default is false.
-    -ao, -allow-origin=<bool>   If true, ran will add a "Access-Control-Allow-Origin: *" header in the response. Default is false.
+    -nc, -no-cache=<bool>       If true, ran will remove Last-Modified header and write some no-cache headers to the response:
+                                    Cache-Control: no-cache, no-store, must-revalidate
+                                    Pragma: no-cache
+                                    Expires 0
+                                Default is false.
+
+         -cors=<bool>           If true, ran will write some Cross-origin resource sharing headers to the response:
+                                    Access-Control-Allow-Origin: *
+                                    Access-Control-Allow-Credentials: true
+                                If the request header has a Origin field, then it's value is used in Access-Control-Allow-Origin.
+                                Default is false.
 
     -am, -auth-method=<auth>    Set authentication method, valid values are basic and digest. Default is basic.
     -a,  -auth=<user:pass>      Turn on authentication and set username and password (separate by colon).
@@ -352,8 +361,7 @@ func LoadConfig(versionInfo string) {
     flag.BoolVar(  &Config.Gzip,        "gzip",             true,    "Turn on/off gzip compression")
     flag.BoolVar(  &Config.NoCache,     "nc",               false,   "If send no-cache header")
     flag.BoolVar(  &Config.NoCache,     "no-cache",         false,   "If send no-cache header")
-    flag.BoolVar(  &Config.AllowOrigin, "ao",               false,   "If send 'Access-Control-Allow-Origin: *' header")
-    flag.BoolVar(  &Config.AllowOrigin, "allow-origin",     false,   "If send 'Access-Control-Allow-Origin: *' header")
+    flag.BoolVar(  &Config.CORS,        "cors",             false,   "If send CORS headers")
     flag.BoolVar(  &Config.ShowConf,    "showconf",         false,   "If show config info in the log")
     flag.BoolVar(  &Config.Debug,       "debug",            false,   "Turn on debug mode")
     flag.BoolVar(  &version,            "v",                false,   "Show version information")
