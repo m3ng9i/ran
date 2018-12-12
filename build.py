@@ -26,11 +26,9 @@ def lastCommitId():
 
 # Get package name in the current directory.
 # E.g. github.com/m3ng9i/ran
+# This function is not used any more.
 def packageName():
     return runCmd("go list")
-
-
-pkgName = ""
 
 
 # Assemble build command.
@@ -39,18 +37,18 @@ def buildCmd():
 
     version = lastTag()
     if version != "":
-        buildFlag.append("-X '{}/global._version_={}'".format(pkgName, version))
+        buildFlag.append("-X 'main._version_={}'".format(version))
 
     branchName = branch()
     if branchName != "":
-        buildFlag.append("-X '{}/global._branch_={}'".format(pkgName, branchName))
+        buildFlag.append("-X 'main._branch_={}'".format(branchName))
 
     commitId = lastCommitId()
     if commitId != "":
-        buildFlag.append("-X '{}/global._commitId_={}'".format(pkgName, commitId))
+        buildFlag.append("-X 'main._commitId_={}'".format(commitId))
 
     # current time
-    buildFlag.append("-X '{}/global._buildTime_={}'".format(pkgName, time.strftime("%Y-%m-%d %H:%M %z")))
+    buildFlag.append("-X 'main._buildTime_={}'".format(time.strftime("%Y-%m-%d %H:%M %z")))
 
     return 'go build -ldflags "{}"'.format(" ".join(buildFlag))
 
@@ -138,11 +136,6 @@ errmsg = "Arguments are not valid GOOS/GOARCH pairs, use -h for help"
 
 
 def main():
-
-    global pkgName
-    pkgName = packageName()
-    if pkgName == "":
-        sys.exit("Can not get package name, you must run this command under a go import path.")
 
     if len(sys.argv) <= 1:
         build()

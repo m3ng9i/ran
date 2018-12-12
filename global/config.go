@@ -9,16 +9,6 @@ import phelper "github.com/m3ng9i/go-utils/path"
 import "github.com/m3ng9i/ran/server"
 
 
-// version information
-var _version_   = "unknown"
-var _branch_    = "unknown"
-var _commitId_  = "unknown"
-var _buildTime_ = "unknown"
-
-var versionInfo = fmt.Sprintf("Version: %s, Branch: %s, Build: %s, Build time: %s",
-        _version_, _branch_, _commitId_, _buildTime_)
-
-
 type TLSPolicy string
 const (
     TLSRedirect TLSPolicy = "redirect"
@@ -200,6 +190,8 @@ IndexName: %s
 ListDir: %t
 ServeAll: %t
 Gzip: %t
+NoCache: %t
+CORS: %t
 Debug: %t
 Auth: %s
 Path401: %s
@@ -223,6 +215,8 @@ Path401: %s
                     this.ListDir,
                     this.ServeAll,
                     this.Gzip,
+                    this.NoCache,
+                    this.CORS,
                     this.Debug,
                     auth,
                     path401,
@@ -262,46 +256,58 @@ Usage: ran [Options...]
 
 Options:
 
-    -r,  -root=<path>        Root path of the site. Default is current working directory.
-    -p,  -port=<port>        HTTP port. Default is 8080.
-         -404=<path>         Path of a custom 404 file, relative to Root. Example: /404.html.
-    -i,  -index=<path>       File name of index, priority depends on the order of values.
-                             Separate by colon. Example: -i "index.html:index.htm"
-                             If not provide, default is index.html and index.htm.
-    -l,  -listdir=<bool>     When request a directory and no index file found,
-                             if listdir is true, show file list of the directory,
-                             if listdir is false, return 404 not found error.
-                             Default is false.
-    -sa, -serve-all=<bool>   Serve all paths even if the path is start with dot.
-    -g,  -gzip=<bool>        Turn on or off gzip compression. Default value is true (means turn on).
+    -r,  -root=<path>           Root path of the site. Default is current working directory.
+    -p,  -port=<port>           HTTP port. Default is 8080.
+         -404=<path>            Path of a custom 404 file, relative to Root. Example: /404.html.
+    -i,  -index=<path>          File name of index, priority depends on the order of values.
+                                Separate by colon. Example: -i "index.html:index.htm"
+                                If not provide, default is index.html and index.htm.
+    -l,  -listdir=<bool>        When request a directory and no index file found,
+                                if listdir is true, show file list of the directory,
+                                if listdir is false, return 404 not found error.
+                                Default is false.
+    -sa, -serve-all=<bool>      Serve all paths even if the path is start with dot. Default is false.
+    -g,  -gzip=<bool>           Turn on or off gzip compression. Default value is true (means turn on).
 
-    -am, -auth-method=<auth> Set authentication method, valid values are basic and digest. Default is basic.
-    -a,  -auth=<user:pass>   Turn on authentication and set username and password (separate by colon).
-                             After turn on authentication, all the page require authentication.
-         -401=<path>         Path of a custom 401 file, relative to Root. Example: /401.html.
-                             If authentication fails and 401 file is set,
-                             the file content will be sent to the client.
+    -nc, -no-cache=<bool>       If true, ran will remove Last-Modified header and write some no-cache headers to the response:
+                                    Cache-Control: no-cache, no-store, must-revalidate
+                                    Pragma: no-cache
+                                    Expires 0
+                                Default is false.
 
-         -tls-port=<port>    HTTPS port. Default is 443.
-         -tls-policy=<pol>   This option indicates how to handle HTTP and HTTPS traffic.
-                             There are three option values: redirect, both and only.
-                             redirect: redirect HTTP to HTTPS
-                             both:     both HTTP and HTTPS are enabled
-                             only:     only HTTPS is enabled, HTTP is disabled
-                             The default value is: only.
-         -cert=<path>        Load a file as a certificate.
-                             If use with -make-cert, will generate a certificate to the path.
-         -key=<path>         Load a file as a private key.
-                             If use with -make-cert, will generate a private key to the path.
+         -cors=<bool>           If true, ran will write some Cross-origin resource sharing headers to the response:
+                                    Access-Control-Allow-Origin: *
+                                    Access-Control-Allow-Credentials: true
+                                If the request header has a Origin field, then it's value is used in Access-Control-Allow-Origin.
+                                Default is false.
+
+    -am, -auth-method=<auth>    Set authentication method, valid values are basic and digest. Default is basic.
+    -a,  -auth=<user:pass>      Turn on authentication and set username and password (separate by colon).
+                                After turn on authentication, all the page require authentication.
+         -401=<path>            Path of a custom 401 file, relative to Root. Example: /401.html.
+                                If authentication fails and 401 file is set,
+                                the file content will be sent to the client.
+
+         -tls-port=<port>       HTTPS port. Default is 443.
+         -tls-policy=<pol>      This option indicates how to handle HTTP and HTTPS traffic.
+                                There are three option values: redirect, both and only.
+                                redirect: redirect HTTP to HTTPS
+                                both:     both HTTP and HTTPS are enabled
+                                only:     only HTTPS is enabled, HTTP is disabled
+                                The default value is: only.
+         -cert=<path>           Load a file as a certificate.
+                                If use with -make-cert, will generate a certificate to the path.
+         -key=<path>            Load a file as a private key.
+                                If use with -make-cert, will generate a private key to the path.
 
 Other options:
 
-         -make-cert          Generate a self-signed certificate and a private key used in TLS encryption.
-                             You should use -cert and -key to set the output paths.
-         -showconf           Show config info in the log.
-         -debug              Turn on debug mode.
-    -v,  -version            Show version information.
-    -h,  -help               Show help message.
+         -make-cert             Generate a self-signed certificate and a private key used in TLS encryption.
+                                You should use -cert and -key to set the output paths.
+         -showconf              Show config info in the log.
+         -debug                 Turn on debug mode.
+    -v,  -version               Show version information.
+    -h,  -help                  Show help message.
 
 Author:
 
@@ -314,7 +320,7 @@ os.Exit(0)
 }
 
 
-func LoadConfig() {
+func LoadConfig(versionInfo string) {
 
     var err error
     Config, err = defaultConfig()
@@ -335,35 +341,38 @@ func LoadConfig() {
         // TODO: load config file
     }
 
-    flag.UintVar(  &port,            "p",           0,       "HTTP port")
-    flag.UintVar(  &port,            "port",        0,       "HTTP port")
-    flag.StringVar(&root,            "r",           "",      "Root path of the website")
-    flag.StringVar(&root,            "root",        "",      "Root path of the website")
-    flag.StringVar(&path404,         "404",         "",      "Path of a custom 404 file")
-    flag.StringVar(&path401,         "401",         "",      "Path of a custom 401 file")
-    flag.StringVar(&authMethod,      "am",          "basic", "authentication method")
-    flag.StringVar(&authMethod,      "auth-method", "basic", "authentication method")
-    flag.StringVar(&auth,            "a",           "",      "Username and password of auth, separate by colon")
-    flag.StringVar(&auth,            "auth",        "",      "Username and password of auth, separate by colon")
-    flag.Var(      &indexName,       "i",                    "File name of index, separate by colon")
-    flag.Var(      &indexName,       "index",                "File name of index, separate by colon")
-    flag.BoolVar(  &Config.ListDir,  "l",           false,   "Show file list of a directory")
-    flag.BoolVar(  &Config.ListDir,  "listdir",     false,   "Show file list of a directory")
-    flag.BoolVar(  &Config.ServeAll, "sa",          false,   "Serve all paths even if the path is start with dot")
-    flag.BoolVar(  &Config.ServeAll, "serve-all",   false,   "Serve all paths even if the path is start with dot")
-    flag.BoolVar(  &Config.Gzip,     "g",           true,    "Turn on/off gzip compression")
-    flag.BoolVar(  &Config.Gzip,     "gzip",        true,    "Turn on/off gzip compression")
-    flag.BoolVar(  &Config.ShowConf, "showconf",    false,   "If show config info in the log")
-    flag.BoolVar(  &Config.Debug,    "debug",       false,   "Turn on debug mode")
-    flag.BoolVar(  &version,         "v",           false,   "Show version information")
-    flag.BoolVar(  &version,         "version",     false,   "Show version information")
-    flag.BoolVar(  &help,            "h",           false,   "Show help message")
-    flag.BoolVar(  &help,            "help",        false,   "Show help message")
-    flag.BoolVar(  &makeCert,        "make-cert",   false,   "Generate a self-signed certificate and a private key")
-    flag.StringVar(&certPath,        "cert",        "",      "Path of certificate")
-    flag.StringVar(&keyPath,         "key",         "",      "Path of private key")
-    flag.UintVar(  &tlsPort,         "tls-port",    0,       "HTTPS port")
-    flag.StringVar(&tlsPolicy,       "tls-policy",  "",      "TLS policy")
+    flag.UintVar(  &port,               "p",                0,       "HTTP port")
+    flag.UintVar(  &port,               "port",             0,       "HTTP port")
+    flag.StringVar(&root,               "r",                "",      "Root path of the website")
+    flag.StringVar(&root,               "root",             "",      "Root path of the website")
+    flag.StringVar(&path404,            "404",              "",      "Path of a custom 404 file")
+    flag.StringVar(&path401,            "401",              "",      "Path of a custom 401 file")
+    flag.StringVar(&authMethod,         "am",               "basic", "authentication method")
+    flag.StringVar(&authMethod,         "auth-method",      "basic", "authentication method")
+    flag.StringVar(&auth,               "a",                "",      "Username and password of auth, separate by colon")
+    flag.StringVar(&auth,               "auth",             "",      "Username and password of auth, separate by colon")
+    flag.Var(      &indexName,          "i",                         "File name of index, separate by colon")
+    flag.Var(      &indexName,          "index",                     "File name of index, separate by colon")
+    flag.BoolVar(  &Config.ListDir,     "l",                false,   "Show file list of a directory")
+    flag.BoolVar(  &Config.ListDir,     "listdir",          false,   "Show file list of a directory")
+    flag.BoolVar(  &Config.ServeAll,    "sa",               false,   "Serve all paths even if the path is start with dot")
+    flag.BoolVar(  &Config.ServeAll,    "serve-all",        false,   "Serve all paths even if the path is start with dot")
+    flag.BoolVar(  &Config.Gzip,        "g",                true,    "Turn on/off gzip compression")
+    flag.BoolVar(  &Config.Gzip,        "gzip",             true,    "Turn on/off gzip compression")
+    flag.BoolVar(  &Config.NoCache,     "nc",               false,   "If send no-cache header")
+    flag.BoolVar(  &Config.NoCache,     "no-cache",         false,   "If send no-cache header")
+    flag.BoolVar(  &Config.CORS,        "cors",             false,   "If send CORS headers")
+    flag.BoolVar(  &Config.ShowConf,    "showconf",         false,   "If show config info in the log")
+    flag.BoolVar(  &Config.Debug,       "debug",            false,   "Turn on debug mode")
+    flag.BoolVar(  &version,            "v",                false,   "Show version information")
+    flag.BoolVar(  &version,            "version",          false,   "Show version information")
+    flag.BoolVar(  &help,               "h",                false,   "Show help message")
+    flag.BoolVar(  &help,               "help",             false,   "Show help message")
+    flag.BoolVar(  &makeCert,           "make-cert",        false,   "Generate a self-signed certificate and a private key")
+    flag.StringVar(&certPath,           "cert",             "",      "Path of certificate")
+    flag.StringVar(&keyPath,            "key",              "",      "Path of private key")
+    flag.UintVar(  &tlsPort,            "tls-port",         0,       "HTTPS port")
+    flag.StringVar(&tlsPolicy,          "tls-policy",       "",      "TLS policy")
 
     flag.Usage = usage
 
