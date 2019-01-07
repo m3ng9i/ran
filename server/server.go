@@ -17,6 +17,7 @@ func serveFile(w http.ResponseWriter, r *http.Request, abspath string, setLastMo
     if err != nil {
         return err
     }
+    defer f.Close()
 
     info, err := f.Stat()
     if err != nil {
