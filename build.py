@@ -2,6 +2,8 @@
 
 import os, time, subprocess, getopt, sys
 
+mainFile = "ran.go"
+
 
 def runCmd(cmd):
     p = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
@@ -81,7 +83,8 @@ def isValidOSArch(goos, goarch):
 
 # Build binary for current OS and architecture
 def build():
-    if subprocess.call(buildCmd(), shell = True) == 0:
+    cmd = "{} {}".format(buildCmd(), mainFile)
+    if subprocess.call(cmd, shell = True) == 0:
         print("Build finished.")
 
 
@@ -96,7 +99,7 @@ def buildPlatform(pairs, filePrefix):
         if p[0] == "windows":
             filename += ".exe"
 
-        c = "GOOS={} GOARCH={} {} -o {}".format(p[0], p[1], cmd, filename)
+        c = "GOOS={} GOARCH={} {} -o {} {}".format(p[0], p[1], cmd, filename, mainFile)
         if subprocess.call(c, shell = True) == 0:
             print("Build finished: {}".format(filename))
         else:
