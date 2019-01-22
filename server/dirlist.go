@@ -1,6 +1,6 @@
 package server
 
-import "text/template"
+import "html/template"
 import "fmt"
 import "os"
 import "time"
@@ -147,7 +147,6 @@ func (this *RanServer) listDir(w http.ResponseWriter, serveAll bool, c *context)
         if i.IsDir() {
             name += "/"
         }
-        name = html.EscapeString(name)
 
         // skip hidden path
         if !serveAll && strings.HasPrefix(name, ".") {
