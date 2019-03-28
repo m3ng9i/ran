@@ -1,0 +1,14 @@
+github.com/abbot/go-http-auth v0.4.0 h1:QjmvZ5gSC7jm3Zg54DqWE/T5m1t2AfDu6QlXJT0EVT0=
+github.com/abbot/go-http-auth v0.4.0/go.mod h1:Cz6ARTIzApMJDzh5bRMSUou6UMSp0IEXg9km/ci7TJM=
+github.com/m3ng9i/go-utils v0.0.0-20160811013010-f9b7dc669fde h1:KTpolqFTLBoaeYFv6LPdMjEXKxXwcSBOkhljEcKyXpg=
+github.com/m3ng9i/go-utils v0.0.0-20160811013010-f9b7dc669fde/go.mod h1:jlNYPSxzqZ9O1PhIQop8vmA7XEbOpAVgeWv1/MB3Vo4=
+github.com/m3ng9i/ran v0.1.3 h1:FJw3HILfd07MShpq/LLGIzkaz9Q+nH1dL3f9v1XjTtI=
+github.com/m3ng9i/ran v0.1.3/go.mod h1:wQrV9jFgsQ/FnFlH7qAJxpNnM3KohgKJkdVMfUutyu0=
+github.com/oxtoacart/bpool v0.0.0-20190227141107-8c4636f812cc h1:uhnyuvDwdKbjemAXHKsiEZOPagHim2nRjMcazH1g26A=
+github.com/oxtoacart/bpool v0.0.0-20190227141107-8c4636f812cc/go.mod h1:L3UMQOThbttwfYRNFOWLLVXMhk5Lkio4GGOtw5UrxS0=
+golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2 h1:VklqNMn3ovrHsnt90PveolxSbWFaJdECFbxSq0Mqo2M=
+golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
+golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53 h1:kcXqo9vE6fsZY5X5Rd7R1l7fTgnWaDCVmln65REefiE=
+golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
+golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

@@ -133,7 +133,7 @@ func startLog() {
 
 func main() {
 
-    global.LoadConfig(versionInfo)
+    global.LoadConfig()
 
     defer func() {
         global.Logger.Wait()
