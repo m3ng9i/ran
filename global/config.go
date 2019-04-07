@@ -275,9 +275,11 @@ Options:
                                     Expires 0
                                 Default is false.
 
-         -cors=<bool>           If true, ran will write some Cross-origin resource sharing headers to the response:
+         -cors=<bool>           If true, ran will write some cross-origin resource sharing headers to the response:
                                     Access-Control-Allow-Origin: *
                                     Access-Control-Allow-Credentials: true
+                                    Access-Control-Allow-Methods: *
+                                    Access-Control-Allow-Headers: *
                                 If the request header has a Origin field, then it's value is used in Access-Control-Allow-Origin.
                                 Default is false.
 
