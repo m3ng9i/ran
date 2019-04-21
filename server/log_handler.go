@@ -56,7 +56,7 @@ var LogLayoutShort LogLayout = `Access #%i: [%s] [%h] [%a] [%m] [%S] [%l] [%r] [
 var LogLayoutMin LogLayout = `Access #%i: [%s] [%a] [%m] [%l] [%n]`
 
 
-// Check if a log layout is legal.
+// IsLegal checks if a log layout is legal.
 func (this *LogLayout) IsLegal() bool {
 
     var in bool
