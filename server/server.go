@@ -116,7 +116,7 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
     // display 404 error
     if !context.exist {
         if this.config.Path404 != nil {
-            _, err = ErrorFile404(w, *this.config.Path404)
+            _, err = ErrorFile404(w, this.config.Path404.Abs)
             if err != nil {
                 this.logger.Errorf("#%s: Load 404 file error: %s", requestId, err)
                 Error(w, 404)
@@ -125,6 +125,13 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
             Error(w, 404)
         }
         return
+    }
+    if this.config.Path404 != nil && context.cleanPath == this.config.Path404.Rel {
+        _, err = ErrorFile404(w, this.config.Path404.Abs)
+        if err != nil {
+            this.logger.Errorf("#%s: Load 404 file error: %s", requestId, err)
+            Error(w, 404)
+        }
     }
 
     // display index page

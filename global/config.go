@@ -31,20 +31,22 @@ const DefaultTLSPolicy = TLSOnly
 
 // Setting about ran server
 type Setting struct {
-    Port        uint            // HTTP port. Default is 8080.
-    ShowConf    bool            // If show config info in the log.
-    Debug       bool            // If turns on debug mode. Default is false.
-    TLS         *TLSOption      // If is nil, TLS is off.
+    Port            uint            // HTTP port. Default is 8080.
+    ShowConf        bool            // If show config info in the log.
+    Debug           bool            // If turns on debug mode. Default is false.
+    TLS             *TLSOption      // If is nil, TLS is off.
+    errorFile401    *string
+    errorFile404    *string
     server.Config
 }
 
 
-// check if this.Path404 or this.Path401 is correct and return a absolute form of path (newPath).
+// check if path of 404 or 401 file is correct and return an server.ErrorFilePath.
 // if the path is not correct, return an error
 // p: path of 404 or 401 file, example: /404.html
 // name: name of the error file, 401 or 404
-func (this *Setting) checkCustomErrorFile(p, name string) (newPath string, err error) {
-    newPath = filepath.Join(this.Root, p)
+func (this *Setting) checkCustomErrorFile(p, name string) (errorFile *server.ErrorFilePath, err error) {
+    newPath := filepath.Join(this.Root, p)
 
     // check if the custom error file is under root
     root := this.Root
@@ -63,8 +65,15 @@ func (this *Setting) checkCustomErrorFile(p, name string) (newPath string, err e
         return
     }
 
+    relPath, _ := filepath.Rel(root, newPath)
+
+    errorFile = new(server.ErrorFilePath)
+    errorFile.Abs = newPath
+    errorFile.Rel = "/" + relPath
+
     return
 }
+
 
 func (this *Setting) check() (errmsg []string) {
 
@@ -102,9 +111,8 @@ func (this *Setting) check() (errmsg []string) {
         }
     }
 
-    if this.Path404 != nil {
-        var err error
-        *this.Path404, err = this.checkCustomErrorFile(*this.Path404, "404")
+    if this.errorFile404 != nil {
+        this.Path404, err = this.checkCustomErrorFile(*this.errorFile404, "404")
         if err != nil {
             errmsg = append(errmsg, err.Error())
         }
@@ -125,9 +133,8 @@ func (this *Setting) check() (errmsg []string) {
             }
         }
 
-        if this.Path401 != nil {
-            var err error
-            *this.Path401, err = this.checkCustomErrorFile(*this.Path401, "401")
+        if this.errorFile401 != nil {
+            this.Path401, err = this.checkCustomErrorFile(*this.errorFile401, "401")
             if err != nil {
                 errmsg = append(errmsg, err.Error())
             }
@@ -199,12 +206,12 @@ Path401: %s
 
     path404 := "<None>"
     if this.Path404 != nil {
-        path404 = *this.Path404
+        path404 = this.Path404.Rel
     }
 
     path401 := "<None>"
     if this.Path401 != nil {
-        path401 = *this.Path401
+        path401 = this.Path401.Rel
     }
 
     s = fmt.Sprintf(s,
@@ -430,7 +437,7 @@ func LoadConfig(versionInfo string) {
     }
 
     if path404 != "" {
-        Config.Path404 = &path404
+        Config.errorFile404 = &path404
     }
 
     if len(indexName) > 0 {
@@ -451,7 +458,7 @@ func LoadConfig(versionInfo string) {
         Config.Auth.Method = server.AuthMethod(strings.ToLower(authMethod))
 
         if path401 != "" {
-            Config.Path401 = &path401
+            Config.errorFile401 = &path401
         }
     }
 

@@ -35,12 +35,19 @@ type Auth struct {
 }
 
 
+// ErrorFilePath describe path of a 401/404 file which is under directory of Root.
+type ErrorFilePath struct {
+    Abs string // Absolute path of error file, e.g. /data/wwwroot/404.html
+    Rel string // Path of error file, relative to the root, e.g. /404.html
+}
+
+
 type Config struct {
     Root        string          // Root path of the website. Default is current working directory.
-    Path404     *string         // Abspath of custom 404 file, under directory of Root.
+    Path404     *ErrorFilePath  // Path of custom 404 file, under directory of Root.
                                 // When a 404 not found error occurs, the file's content will be send to client.
                                 // nil means do not use 404 file.
-    Path401     *string         // Abspath of custom 401 file, under directory of Root.
+    Path401     *ErrorFilePath  // Path of custom 401 file, under directory of Root.
                                 // When a 401 unauthorized error occurs, the file's content will be send to client.
                                 // nil means do not use 401 file.
     IndexName   Index           // File name of index, priority depends on the order of values.

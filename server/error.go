@@ -62,12 +62,12 @@ func ErrorFile404(w http.ResponseWriter, abspath string) (int64, error) {
 
 func errorFile401(config Config) (a *hhelper.AuthFile, err error) {
     if config.Path401 != nil {
-        tp, _ := hhelper.FileContentType(path.Ext(*config.Path401))
+        tp, _ := hhelper.FileContentType(path.Ext(config.Path401.Abs))
         if tp == "" {
             tp = "text/html; charset=utf-8"
         }
 
-        b, e := ioutil.ReadFile(*config.Path401)
+        b, e := ioutil.ReadFile(config.Path401.Abs)
         if e != nil {
             err = e
             return
