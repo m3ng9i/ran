@@ -175,6 +175,16 @@ func (this *RanServer) listDir(w http.ResponseWriter, serveAll bool, c *context)
             files = append(files, dirListFiles{Name:"[..]", Url:parent, ModTime:info.ModTime()})
         }
 
+        fileRelPath := path.Join(c.cleanPath, name)
+
+        // skip 404 file
+        if this.config.Path404 != nil && fileRelPath == this.config.Path404.Rel {
+            continue
+        }
+        // skip 401 file
+        if this.config.Path401 != nil && fileRelPath == this.config.Path401.Rel {
+            continue
+        }
         files = append(files, dirListFiles{Name:name, Url:fileUrl.String(), Size:i.Size(), ModTime:i.ModTime()})
     }
 
