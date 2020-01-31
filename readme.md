@@ -43,6 +43,13 @@ For convenience, you can move the ran binary to a directory in the PATH environm
 
 You can also call `./build.py` command under the Ran source directory to write version information into the binary, so that `ran -v` will give a significant result. Run `./build.py -h` for help.
 
+### Running with Docker
+
+```bash
+docker run -d -p 8080:8080 -v /public:/web m3ng9i/ran
+```
+Directory volume mounted to `/web` will be served by default.
+
 ## Download binary
 
 You can also download the Ran binary without building it yourself.
