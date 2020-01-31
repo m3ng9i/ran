@@ -1,9 +1,12 @@
 Ran: a simple static web server written in Go
 =============================================
 
-![Ran](ran.gif)
+![Ran](https://raw.githubusercontent.com/m3ng9i/ran/master/ran.gif)
 
 Ran is a simple web server for serving static files.
+
+- Github: <https://github.com/m3ng9i/ran>
+- Docker Hub: <https://hub.docker.com/r/m3ng9i/ran>
 
 ## Features
 
@@ -48,7 +51,14 @@ You can also call `./build.py` command under the Ran source directory to write v
 ```bash
 docker run -d -p 8080:8080 -v /public:/web m3ng9i/ran
 ```
+
 Directory volume mounted to `/web` will be served by default.
+
+Below is another example, the options `-l -404 /404page.html` are passed to the `ran` binary:
+
+```bash
+docker run --name ran -d -p 8080:8080 -v /public:/web:ro m3ng9i/ran -l -404 /404page.html
+```
 
 ## Download binary
 
