@@ -2,7 +2,6 @@ package main
 
 import "syscall"
 import "os/signal"
-import "net"
 import "net/http"
 import "os"
 import "fmt"
@@ -35,60 +34,24 @@ func catchSignal() {
 }
 
 
-
-// Get all available IPv4 addresses in system's network interface.
-func getIPAutomaticly() (ip []string, e error) {
-    iface, err := net.Interfaces()
-    if err != nil {
-        e = err
-        return
-    }
-
-    for _, i := range iface {
-        addrs, err := i.Addrs()
-        if e != nil {
-            e = err
-            return
-        }
-        for _, a := range addrs {
-            add := net.ParseIP(strings.SplitN(a.String(), "/", 2)[0])
-            if add.To4() != nil {
-                ip = append(ip, add.String())
-            }
-        }
-    }
-
-    for _, i := range ip {
-        if i == "127.0.0.1" {
-            return
-        }
-    }
-
-    // add loopback
-    ip = append(ip, "127.0.0.1")
-
-    return
-}
-
-
-// Get all Listening address, like: http://127.0.0.1:8080
+// Get all Listening address, like: http://127.0.0.1:8080. The return value is used for recording logs.
 func getListeningAddr() (addr []string, err error) {
-    ips, err := getIPAutomaticly()
-    if err != nil {
-        return
-    }
-
-    for _, i := range ips {
+    for _, ip := range global.Config.IP {
         if global.Config.TLS != nil {
             if global.Config.TLS.Policy == global.TLSOnly {
-                addr = append(addr, fmt.Sprintf("https://%s:%d", i, global.Config.TLS.Port))
+                addr = append(addr, fmt.Sprintf("https://%s:%d", ip, global.Config.TLS.Port))
             } else {
-                addr = append(addr, fmt.Sprintf("http://%s:%d", i, global.Config.Port))
-                addr = append(addr, fmt.Sprintf("https://%s:%d", i, global.Config.TLS.Port))
+                addr = append(addr, fmt.Sprintf("http://%s:%d", ip, global.Config.Port))
+                addr = append(addr, fmt.Sprintf("https://%s:%d", ip, global.Config.TLS.Port))
             }
         } else {
-            addr = append(addr, fmt.Sprintf("http://%s:%d", i, global.Config.Port))
+            addr = append(addr, fmt.Sprintf("http://%s:%d", ip, global.Config.Port))
         }
+    }
+
+    if len(addr) == 0 {
+        err = fmt.Errorf("No IP address provided")
+        return
     }
 
     return
@@ -132,7 +95,6 @@ func startLog() {
 
 
 func main() {
-
     global.LoadConfig(versionInfo)
 
     defer func() {
@@ -158,39 +120,53 @@ func main() {
     ran := server.NewRanServer(global.Config.Config, global.Logger)
 
     startHTTPServer := func() {
-        wg.Add(1)
-        go func() {
-            err := http.ListenAndServe(fmt.Sprintf(":%d", global.Config.Port), ran.Serve())
-            if err != nil {
-                global.Logger.Fatal(err)
-            }
-            wg.Done()
-        }()
+        for _, ip := range global.Config.IP {
+            wg.Add(1)
+            go func(ip string) {
+                err := http.ListenAndServe(
+                        fmt.Sprintf("%s:%d", ip, global.Config.Port),
+                        ran.Serve(),
+                )
+                if err != nil {
+                    global.Logger.Fatal(err)
+                }
+                wg.Done()
+            }(ip)
+        }
     }
 
     startTLSServer := func() {
-        wg.Add(1)
-        go func() {
-            err := http.ListenAndServeTLS(fmt.Sprintf(":%d", global.Config.TLS.Port),
-                    global.Config.TLS.PublicKey,
-                    global.Config.TLS.PrivateKey,
-                    ran.Serve())
-            if err != nil {
-                global.Logger.Fatal(err)
-            }
-            wg.Done()
-        }()
+        for _, ip := range global.Config.IP {
+            wg.Add(1)
+            go func(ip string) {
+                err := http.ListenAndServeTLS(
+                        fmt.Sprintf("%s:%d", ip, global.Config.TLS.Port),
+                        global.Config.TLS.PublicKey,
+                        global.Config.TLS.PrivateKey,
+                        ran.Serve(),
+                )
+                if err != nil {
+                    global.Logger.Fatal(err)
+                }
+                wg.Done()
+            }(ip)
+        }
     }
 
     redirectToHTTPS := func() {
-        wg.Add(1)
-        go func() {
-            err := http.ListenAndServe(fmt.Sprintf(":%d", global.Config.Port), ran.RedirectToHTTPS(global.Config.TLS.Port))
-            if err != nil {
-                global.Logger.Fatal(err)
-            }
-            wg.Done()
-        }()
+        for _, ip := range global.Config.IP {
+            wg.Add(1)
+            go func(ip string) {
+                err := http.ListenAndServe(
+                    fmt.Sprintf("%s:%d", ip, global.Config.Port),
+                    ran.RedirectToHTTPS(global.Config.TLS.Port),
+                )
+                if err != nil {
+                    global.Logger.Fatal(err)
+                }
+                wg.Done()
+            }(ip)
+        }
     }
 
     if global.Config.TLS != nil {

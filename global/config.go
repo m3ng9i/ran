@@ -31,6 +31,7 @@ const DefaultTLSPolicy = TLSOnly
 
 // Setting about ran server
 type Setting struct {
+    IP              []string        // IP addresses binded to ran server.
     Port            uint            // HTTP port. Default is 8080.
     ShowConf        bool            // If show config info in the log.
     Debug           bool            // If turns on debug mode. Default is false.
@@ -264,6 +265,9 @@ Usage: ran [Options...]
 Options:
 
     -r,  -root=<path>           Root path of the site. Default is current working directory.
+    -b,  -bind-ip=<ip>          Bind one or more IP addresses to the ran web server.
+                                Multiple IP addresses should be separated by comma.
+                                If not provide this Option, ran will use 0.0.0.0.
     -p,  -port=<port>           HTTP port. Default is 8080.
          -404=<path>            Path of a custom 404 file, relative to Root. Example: /404.html.
     -i,  -index=<path>          File name of index, priority depends on the order of values.
@@ -338,7 +342,7 @@ func LoadConfig(versionInfo string) {
         os.Exit(1)
     }
 
-    var configPath, root, path404, authMethod, auth, path401, certPath, keyPath, tlsPolicy string
+    var configPath, bindip, root, path404, authMethod, auth, path401, certPath, keyPath, tlsPolicy string
     var port, tlsPort uint
     var indexName server.Index
     var version, help, makeCert bool
@@ -350,6 +354,8 @@ func LoadConfig(versionInfo string) {
         // TODO: load config file
     }
 
+    flag.StringVar(&bindip,             "b",                "",      "IP addresses binded to ran server")
+    flag.StringVar(&bindip,             "bind-ip",          "",      "IP addresses binded to ran server")
     flag.UintVar(  &port,               "p",                0,       "HTTP port")
     flag.UintVar(  &port,               "port",             0,       "HTTP port")
     flag.StringVar(&root,               "r",                "",      "Root path of the website")
@@ -428,6 +434,12 @@ func LoadConfig(versionInfo string) {
         }
     }
 
+    Config.IP, err = getIPs(bindip)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+        os.Exit(1)
+    }
+
     if port > 0 {
         Config.Port = port
     }
@@ -479,4 +491,5 @@ func LoadConfig(versionInfo string) {
 
     return
 }
+
 
