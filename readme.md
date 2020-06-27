@@ -73,6 +73,7 @@ You can start a web server without any options by typing `ran` and pressing retu
 Configuration               | Default value
 ----------------------------|--------------------------------
 Root directory              | the current working directory
+IP binding                  | 0.0.0.0
 Port                        | 8080
 Index file                  | index.html, index.htm
 List files of directories   | false
@@ -91,6 +92,9 @@ Options:
 
 ```
     -r,  -root=<path>           Root path of the site. Default is current working directory.
+    -b,  -bind-ip=<ip>          Bind one or more IP addresses to the ran web server.
+                                Multiple IP addresses should be separated by comma.
+                                If not provide this Option, ran will use 0.0.0.0.
     -p,  -port=<port>           HTTP port. Default is 8080.
          -404=<path>            Path of a custom 404 file, relative to Root. Example: /404.html.
     -i,  -index=<path>          File name of index, priority depends on the order of values.
@@ -216,6 +220,12 @@ For testing purposes or internal usage, you can use `-make-cert` to create a sel
 ran -make-cert -cert=/path/to/cert.pem -key=/path/to/key.pem
 ```
 
+Example 8: Custom IP binding
+
+```bash
+ran -b=127.0.0.12,192.168.0.34
+```
+
 ## Tips and tricks
 
 ### Execute permission
@@ -249,6 +259,11 @@ http://127.0.0.1:8080/large-file.txt?gzip=false
 Read the source code of [CanBeCompressed()](https://github.com/m3ng9i/go-utils/blob/master/http/can_be_compressed.go) to learn more about automatic gzip compression.
 
 ## Changelog
+
+- **v0.1.5**:
+
+    - Add `-b, -bind-ip` for custom IP binding
+    - URL for 404 page now return status 404
 
 - **v0.1.4**:
 
