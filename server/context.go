@@ -35,6 +35,9 @@ func newContext(config Config, r *http.Request) (c *context, err error) {
 
     requestPath := r.URL.Path
 
+    // Fix directory traversal vulnerability under Windows, see https://github.com/m3ng9i/ran/issues/29
+    requestPath = strings.ReplaceAll(requestPath, `\`, `/`)
+
     if !strings.HasPrefix(requestPath, "/") {
         requestPath = "/" + requestPath
     }
