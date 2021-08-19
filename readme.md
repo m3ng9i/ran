@@ -260,6 +260,8 @@ Read the source code of [CanBeCompressed()](https://github.com/m3ng9i/go-utils/b
 
 ## Changelog
 
+- **v0.1.6**: Fix security issue under Windows
+
 - **v0.1.5**:
 
     - Add `-b, -bind-ip` for custom IP binding
