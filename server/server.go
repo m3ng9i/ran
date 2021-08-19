@@ -96,7 +96,7 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
         setCORSHeader(w, r)
     }
 
-    this.logger.Debugf("#%s: r.URL: [%s]", requestId, r.URL.String())
+    this.logger.Debugf("#%s: r.URL: [%s], r.URL.Path: [%s]", requestId, r.URL.String(), r.URL.Path)
 
     context, err := newContext(this.config, r)
     if err != nil {
