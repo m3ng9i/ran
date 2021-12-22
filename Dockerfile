@@ -1,11 +1,13 @@
 FROM golang:1-alpine as builder
 WORKDIR /app
-ADD . .
+COPY go.mod go.sum .
+RUN go mod download
+COPY . .
 RUN go build .
 
-FROM alpine
-COPY --from=builder /app/ran /ran
+FROM gcr.io/distroless/static
 WORKDIR /web
 EXPOSE 8080
 VOLUME /web
+COPY --from=builder /app/ran /ran
 ENTRYPOINT [ "/ran" ]
