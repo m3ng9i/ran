@@ -10,6 +10,7 @@ import "html"
 import "path"
 import "path/filepath"
 import "strings"
+import "sort"
 
 
 type dirListFiles struct {
@@ -187,6 +188,10 @@ func (this *RanServer) listDir(w http.ResponseWriter, serveAll bool, c *context)
         }
         files = append(files, dirListFiles{Name:name, Url:fileUrl.String(), Size:i.Size(), ModTime:i.ModTime()})
     }
+
+    sort.Slice(files, func(i, j int) bool {
+        return files[i].Name < files[j].Name
+    })
 
     data := dirList{ Title: title, Files: files}
 
