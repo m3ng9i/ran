@@ -120,6 +120,11 @@ Options:
                                     Access-Control-Allow-Headers: *
                                 If the request header has a Origin field, then it's value is used in Access-Control-Allow-Origin.
                                 Default is false.
+         -secure-context=<bool> If true, ran will write some cross-origin security headers to the response:
+                                    Cross-Origin-Opener-Policy: same-origin
+                                    Cross-Origin-Embedder-Policy: require-corp
+                                Default is false.
+
 
     -am, -auth-method=<auth>    Set authentication method, valid values are basic and digest. Default is basic.
     -a,  -auth=<user:pass>      Turn on authentication and set username and password (separate by colon).
