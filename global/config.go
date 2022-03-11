@@ -200,6 +200,7 @@ ServeAll: %t
 Gzip: %t
 NoCache: %t
 CORS: %t
+SecureContext: %t
 Debug: %t
 Auth: %s
 Path401: %s
@@ -225,6 +226,7 @@ Path401: %s
                     this.Gzip,
                     this.NoCache,
                     this.CORS,
+                    this.SecureContext,
                     this.Debug,
                     auth,
                     path401,
@@ -294,6 +296,11 @@ Options:
                                 If the request header has a Origin field, then it's value is used in Access-Control-Allow-Origin.
                                 Default is false.
 
+         -secure-context=<bool> If true, ran will write some cross-origin security headers to the response:
+                                    Cross-Origin-Opener-Policy: same-origin
+                                    Cross-Origin-Embedder-Policy: require-corp
+                                Default is false.
+
     -am, -auth-method=<auth>    Set authentication method, valid values are basic and digest. Default is basic.
     -a,  -auth=<user:pass>      Turn on authentication and set username and password (separate by colon).
                                 After turn on authentication, all the page require authentication.
@@ -354,40 +361,41 @@ func LoadConfig(versionInfo string) {
         // TODO: load config file
     }
 
-    flag.StringVar(&bindip,             "b",                "",      "IP addresses binded to ran server")
-    flag.StringVar(&bindip,             "bind-ip",          "",      "IP addresses binded to ran server")
-    flag.UintVar(  &port,               "p",                0,       "HTTP port")
-    flag.UintVar(  &port,               "port",             0,       "HTTP port")
-    flag.StringVar(&root,               "r",                "",      "Root path of the website")
-    flag.StringVar(&root,               "root",             "",      "Root path of the website")
-    flag.StringVar(&path404,            "404",              "",      "Path of a custom 404 file")
-    flag.StringVar(&path401,            "401",              "",      "Path of a custom 401 file")
-    flag.StringVar(&authMethod,         "am",               "basic", "authentication method")
-    flag.StringVar(&authMethod,         "auth-method",      "basic", "authentication method")
-    flag.StringVar(&auth,               "a",                "",      "Username and password of auth, separate by colon")
-    flag.StringVar(&auth,               "auth",             "",      "Username and password of auth, separate by colon")
-    flag.Var(      &indexName,          "i",                         "File name of index, separate by colon")
-    flag.Var(      &indexName,          "index",                     "File name of index, separate by colon")
-    flag.BoolVar(  &Config.ListDir,     "l",                false,   "Show file list of a directory")
-    flag.BoolVar(  &Config.ListDir,     "listdir",          false,   "Show file list of a directory")
-    flag.BoolVar(  &Config.ServeAll,    "sa",               false,   "Serve all paths even if the path is start with dot")
-    flag.BoolVar(  &Config.ServeAll,    "serve-all",        false,   "Serve all paths even if the path is start with dot")
-    flag.BoolVar(  &Config.Gzip,        "g",                true,    "Turn on/off gzip compression")
-    flag.BoolVar(  &Config.Gzip,        "gzip",             true,    "Turn on/off gzip compression")
-    flag.BoolVar(  &Config.NoCache,     "nc",               false,   "If send no-cache header")
-    flag.BoolVar(  &Config.NoCache,     "no-cache",         false,   "If send no-cache header")
-    flag.BoolVar(  &Config.CORS,        "cors",             false,   "If send CORS headers")
-    flag.BoolVar(  &Config.ShowConf,    "showconf",         false,   "If show config info in the log")
-    flag.BoolVar(  &Config.Debug,       "debug",            false,   "Turn on debug mode")
-    flag.BoolVar(  &version,            "v",                false,   "Show version information")
-    flag.BoolVar(  &version,            "version",          false,   "Show version information")
-    flag.BoolVar(  &help,               "h",                false,   "Show help message")
-    flag.BoolVar(  &help,               "help",             false,   "Show help message")
-    flag.BoolVar(  &makeCert,           "make-cert",        false,   "Generate a self-signed certificate and a private key")
-    flag.StringVar(&certPath,           "cert",             "",      "Path of certificate")
-    flag.StringVar(&keyPath,            "key",              "",      "Path of private key")
-    flag.UintVar(  &tlsPort,            "tls-port",         0,       "HTTPS port")
-    flag.StringVar(&tlsPolicy,          "tls-policy",       "",      "TLS policy")
+    flag.StringVar(&bindip,                 "b",                "",      "IP addresses binded to ran server")
+    flag.StringVar(&bindip,                 "bind-ip",          "",      "IP addresses binded to ran server")
+    flag.UintVar(  &port,                   "p",                0,       "HTTP port")
+    flag.UintVar(  &port,                   "port",             0,       "HTTP port")
+    flag.StringVar(&root,                   "r",                "",      "Root path of the website")
+    flag.StringVar(&root,                   "root",             "",      "Root path of the website")
+    flag.StringVar(&path404,                "404",              "",      "Path of a custom 404 file")
+    flag.StringVar(&path401,                "401",              "",      "Path of a custom 401 file")
+    flag.StringVar(&authMethod,             "am",               "basic", "authentication method")
+    flag.StringVar(&authMethod,             "auth-method",      "basic", "authentication method")
+    flag.StringVar(&auth,                   "a",                "",      "Username and password of auth, separate by colon")
+    flag.StringVar(&auth,                   "auth",             "",      "Username and password of auth, separate by colon")
+    flag.Var(      &indexName,              "i",                         "File name of index, separate by colon")
+    flag.Var(      &indexName,              "index",                     "File name of index, separate by colon")
+    flag.BoolVar(  &Config.ListDir,         "l",                false,   "Show file list of a directory")
+    flag.BoolVar(  &Config.ListDir,         "listdir",          false,   "Show file list of a directory")
+    flag.BoolVar(  &Config.ServeAll,        "sa",               false,   "Serve all paths even if the path is start with dot")
+    flag.BoolVar(  &Config.ServeAll,        "serve-all",        false,   "Serve all paths even if the path is start with dot")
+    flag.BoolVar(  &Config.Gzip,            "g",                true,    "Turn on/off gzip compression")
+    flag.BoolVar(  &Config.Gzip,            "gzip",             true,    "Turn on/off gzip compression")
+    flag.BoolVar(  &Config.NoCache,         "nc",               false,   "If send no-cache header")
+    flag.BoolVar(  &Config.NoCache,         "no-cache",         false,   "If send no-cache header")
+    flag.BoolVar(  &Config.CORS,            "cors",             false,   "If send CORS headers")
+    flag.BoolVar(  &Config.SecureContext,   "secure-context",   false,   "If send secure context headers")
+    flag.BoolVar(  &Config.ShowConf,        "showconf",         false,   "If show config info in the log")
+    flag.BoolVar(  &Config.Debug,           "debug",            false,   "Turn on debug mode")
+    flag.BoolVar(  &version,                "v",                false,   "Show version information")
+    flag.BoolVar(  &version,                "version",          false,   "Show version information")
+    flag.BoolVar(  &help,                   "h",                false,   "Show help message")
+    flag.BoolVar(  &help,                   "help",             false,   "Show help message")
+    flag.BoolVar(  &makeCert,               "make-cert",        false,   "Generate a self-signed certificate and a private key")
+    flag.StringVar(&certPath,               "cert",             "",      "Path of certificate")
+    flag.StringVar(&keyPath,                "key",              "",      "Path of private key")
+    flag.UintVar(  &tlsPort,                "tls-port",         0,       "HTTPS port")
+    flag.StringVar(&tlsPolicy,              "tls-policy",       "",      "TLS policy")
 
     flag.Usage = usage
 

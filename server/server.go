@@ -82,6 +82,12 @@ func setCORSHeader(w http.ResponseWriter, r *http.Request) {
 }
 
 
+func setSecureContextHeader(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
+    w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
+}
+
+
 func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
     requestId := string(getRequestId(r.URL.String()))
@@ -94,6 +100,10 @@ func (this *RanServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
     if (this.config.CORS) {
         setCORSHeader(w, r)
+    }
+
+    if (this.config.SecureContext) {
+        setSecureContextHeader(w, r)
     }
 
     this.logger.Debugf("#%s: r.URL: [%s], r.URL.Path: [%s]", requestId, r.URL.String(), r.URL.Path)
