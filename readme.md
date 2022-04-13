@@ -39,7 +39,7 @@ Ran is a simple web server for serving static files.
 Use the command below to install the dependencies mentioned above, and build the binary into $GOPATH/bin.
 
 ```bash
-go get -u github.com/m3ng9i/ran
+go install github.com/m3ng9i/ran@latest
 ```
 
 For convenience, you can move the ran binary to a directory in the PATH environment variable.
